@@ -9,53 +9,57 @@ import io
 st.set_page_config(page_title="Impat S.r.l. - Generatore DiCo Dinamico", layout="centered")
 
 st.title("⚡ Impat S.r.l. - Generatore DiCo Dinamico")
-st.write("Imposta il numero di unità per far comparire dinamicamente i campi di input dei modelli e dei materiali.")
+st.write("Modifica il numero di unità: i campi per i modelli e le tubazioni compariranno all'istante.")
 
-with st.form("form_dico_dinamico"):
-    st.subheader("📋 1. Dati Documento e Cantiere")
-    col1, col2 = st.columns(2)
-    with col1:
-        num_dico = st.text_input("Numero DiCo", "12-25")
-        data_dico = st.text_input("Data Emissione", "21/10/2026")
-    with col2:
-        potenza = st.text_input("Potenza Impianto (kW)", "11,8 kW")
-        norma = st.text_input("Norma Tecnica", "UNI EN 378")
+# --- 1. DATI DOCUMENTO E CANTIERE ---
+st.subheader("📋 1. Dati Documento e Cantiere")
+col1, col2 = st.columns(2)
+with col1:
+    num_dico = st.text_input("Numero DiCo", "12-25")
+    data_dico = st.text_input("Data Emissione", "21/10/2026")
+with col2:
+    potenza = st.text_input("Potenza Impianto (kW)", "11,8 kW")
+    norma = st.text_input("Norma Tecnica", "UNI EN 378")
 
-    st.subheader("👥 2. Committente e Proprietario")
-    committente = st.text_input("Committente", "De Paolis Mauro")
-    proprietario = st.text_input("Proprietario dei locali", "Pugliese Patrizia")
-    indirizzo = st.text_input("Ubicazione Impianto", "Via degli Scipioni 142, Roma (RM)")
+# --- 2. COMMITTENTE E PROPRIETARIO ---
+st.subheader("👥 2. Committente e Proprietario")
+committente = st.text_input("Committente", "De Paolis Mauro")
+proprietario = st.text_input("Proprietario dei locali", "Pugliese Patrizia")
+indirizzo = st.text_input("Ubicazione Impianto", "Via degli Scipioni 142, Roma (RM)")
 
-    st.subheader("❄️ 3. Unità Esterne e Interne")
-    
-    # Selezione del numero di unità esterne
-    num_esterne = st.number_input("Numero Unità Esterne", min_value=1, max_value=5, value=1, step=1)
-    modelli_esterne = []
-    for i in range(int(num_esterne)):
-        mod = st.text_input(f"Modello Unità Esterna {i+1} (F{i+1})", "Daikin AZAS71MV1", key=f"est_{i}")
-        modelli_esterne.append(mod)
+# --- 3. UNITÀ ESTERNE E INTERNE (DINAMICHE) ---
+st.subheader("❄️ 3. Unità Esterne e Interne")
 
-    st.markdown("---")
-    
-    # Selezione del numero di unità interne (Split)
-    num_interne = st.number_input("Numero Unità Interne (Split)", min_value=1, max_value=10, value=2, step=1)
-    
-    interne_dati = []
-    for i in range(int(num_interne)):
-        st.markdown(f"**Split Interno {i+1}**")
-        col_a, col_b = st.columns(2)
-        with col_a:
-            mod_int = st.text_input(f"Modello Unità Interna {i+1}", "Daikin FBA50A9", key=f"mod_int_{i}")
-        with col_b:
-            tubi_int = st.text_input(f"Tubazioni Rame Split {i+1}", "3/8 + 1/4 (10m)", key=f"tubi_int_{i}")
-        interne_dati.append({"modello": mod_int, "tubi": tubi_int})
+# Unità Esterne
+num_esterne = st.number_input("Numero Unità Esterne", min_value=1, max_value=5, value=1, step=1)
+modelli_esterne = []
+for i in range(int(num_esterne)):
+    mod = st.text_input(f"Modello Unità Esterna {i+1} (F{i+1})", "Daikin AZAS71MV1", key=f"est_{i}")
+    modelli_esterne.append(mod)
 
-    st.subheader("🔧 4. Scarico Condensa e Note")
-    scarico = st.text_input("Scarico Condensa (Generale / Unificato)", "Plastica Ø 16 (10m)")
+st.markdown("---")
 
-    submitted = st.form_submit_button("Genera Pacchetto PDF Dinamico")
+# Unità Interne (Split) - Ora le righe aumentano subito in tempo reale!
+num_interne = st.number_input("Numero Unità Interne (Split)", min_value=1, max_value=10, value=2, step=1)
 
-if submitted:
+interne_dati = []
+for i in range(int(num_interne)):
+    st.markdown(f"**Split Interno {i+1}**")
+    col_a, col_b = st.columns(2)
+    with col_a:
+        mod_int = st.text_input(f"Modello Unità Interna {i+1}", "Daikin FBA50A9", key=f"mod_int_{i}")
+    with col_b:
+        tubi_int = st.text_input(f"Tubazioni Rame Split {i+1}", "3/8 + 1/4 (10m)", key=f"tubi_int_{i}")
+    interne_dati.append({"modello": mod_int, "tubi": tubi_int})
+
+# --- 4. SCARICO CONDENSA ---
+st.subheader("🔧 4. Scarico Condensa e Note")
+scarico = st.text_input("Scarico Condensa (Generale / Unificato)", "Plastica Ø 16 (10m)")
+
+st.markdown("---")
+
+# Pulsante di generazione (fuori dal form, reagisce subito)
+if st.button("🚀 Genera Pacchetto PDF Dinamico", type="primary"):
     pdf_buffer = io.BytesIO()
     doc = SimpleDocTemplate(pdf_buffer, pagesize=A4, rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=30)
     story = []
@@ -155,7 +159,7 @@ if submitted:
 
     st.success("Pacchetto PDF dinamico generato con successo!")
     st.download_button(
-        label="📥 Scarica PDF Dinamico Completo",
+        label="📥 Scarica PDF Completo",
         data=pdf_buffer,
         file_name=f"DiCo_Dinamica_{num_dico.replace('-', '_')}.pdf",
         mime="application/pdf"
