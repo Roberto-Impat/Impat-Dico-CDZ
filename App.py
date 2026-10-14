@@ -78,5 +78,85 @@ if submitted:
     t_comm = Table(dati_comm, colWidths=[270, 270])
     t_comm.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (1,0), colors.HexColor("#D9E1F2")),
-        ('BOX', (0
+        ('BOX', (0,0), (-1,-1), 1, colors.HexColor("#1F4E78")),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, colors.lightgrey),
+        ('PADDING', (0,0), (-1,-1), 6),
+    ]))
+    story.append(t_comm)
+    story.append(Spacer(1, 15))
+
+    dati_imp = [
+        [Paragraph("<b>DESCRIZIONE DELL'IMPIANTO E NORMATIVA</b>", body_style), ""],
+        [Paragraph(f"Tipologia: Climatizzazione ({num_esterne} Est., {num_interne} Int.)", body_style), Paragraph(f"Potenza: {potenza}", body_style)],
+        [Paragraph(f"Norma Tecnica Applicata: {norma}", body_style), Paragraph("Esito verifiche: POSITIVO", body_style)]
+    ]
+    t_imp = Table(dati_imp, colWidths=[270, 270])
+    t_imp.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (1,0), colors.HexColor("#D9E1F2")),
+        ('BOX', (0,0), (-1,-1), 1, colors.HexColor("#1F4E78")),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, colors.lightgrey),
+        ('PADDING', (0,0), (-1,-1), 6),
+    ]))
+    story.append(t_imp)
+    story.append(Spacer(1, 20))
+
+    story.append(Paragraph("<b>DICHIARAZIONE DI RISPONDENZA / CONFORMITÀ (Art. 6 DM 37/08)</b>", heading_style))
+    story.append(Paragraph("Il sottoscritto Responsabile Tecnico dichiara sotto la propria personale responsabilità che l'impianto è stato realizzato in modo conforme alla regola dell'arte, avendo seguito la norma tecnica applicabile, installato componenti adatti e controllato l'impianto ai fini della sicurezza con esito positivo.", body_style))
+    story.append(Spacer(1, 30))
+
+    firme_data = [
+        [Paragraph("<b>Il Responsabile Tecnico</b><br/><br/>Roberto Cortelletti", body_style), Paragraph(f"<b>Il Committente</b><br/><br/>{committente}", body_style)]
+    ]
+    t_firme = Table(firme_data, colWidths=[270, 270])
+    t_firme.setStyle(TableStyle([
+        ('BOX', (0,0), (-1,-1), 0.5, colors.grey),
+        ('PADDING', (0,0), (-1,-1), 12),
+    ]))
+    story.append(t_firme)
+
+    story.append(PageBreak())
+
+    # --- PAGINA 2: TABELLA DEI MATERIALI DINAMICA ---
+    story.append(Paragraph(f"<b>ALLEGATO TECNICO OBBLIGATORI - TABELLA DEI MATERIALI</b><br/>Allegato alla Dichiarazione N° {num_dico}", title_style))
+    story.append(Spacer(1, 10))
+
+    materiali_data = [
+        ["Rif.", "Ubicazione", "Componente / Descrizione", "Modello / Specifiche", "Q.tà", "Note / Normativa"]
+    ]
+
+    ref_idx = 1
+    for mod in modelli_esterne:
+        materiali_data.append([f"F{ref_idx}", "Parete Esterna", "Unità Esterna", mod, "1", "Conforme DM 37/08"])
+        ref_idx += 1
+
+    for idx, item in enumerate(interne_dati):
+        materiali_data.append([f"F{ref_idx}", f"Split Interno {idx+1}", "Unità Interna", item["modello"], "1", "Conforme DM 37/08"])
+        ref_idx += 1
+        materiali_data.append([f"A{idx+1}", f"Split Interno {idx+1}", "Tubazione Frigorifera Rame", item["tubi"], "1", "UNI EN 12735-1"])
+
+    materiali_data.append([f"B1", "Impianto Generale", "Scarico Condensa", scarico, "1", "Plastica rigida/corrugata"])
+
+    t_mat = Table(materiali_data, colWidths=[40, 90, 130, 160, 30, 90])
+    t_mat.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#1F4E78")),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0,0), (-1,-1), 8),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('BOX', (0,0), (-1,-1), 1, colors.HexColor("#1F4E78")),
+        ('INNERGRID', (0,0), (-1,-1), 0.5, colors.grey),
+        ('PADDING', (0,0), (-1,-1), 5),
+    ]))
     
+    story.append(t_mat)
+    doc.build(story)
+    pdf_buffer.seek(0)
+
+    st.success("Pacchetto PDF dinamico generato con successo!")
+    st.download_button(
+        label="📥 Scarica PDF Dinamico Completo",
+        data=pdf_buffer,
+        file_name=f"DiCo_Dinamica_{num_dico.replace('-', '_')}.pdf",
+        mime="application/pdf"
+    )
